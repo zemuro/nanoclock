@@ -96,7 +96,7 @@ void setup() {
   Serial1.begin(31250);
 #endif
 
-#ifdef ARDUINOUNO
+#ifdef ARDUINOUNO_OLED
   // put your setup code here, to run once:
   if(!display.begin(SSD1306_SWITCHCAPVCC)) {
    // Serial.println(F("SSD1306 allocation failed"));
