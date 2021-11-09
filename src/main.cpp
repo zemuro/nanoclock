@@ -8,21 +8,29 @@ partly based on 'Arduino MIDI clock with tap tempo' by DieterVDW (https://github
 */
 
 #include <Arduino.h>
-#include <SPI.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 #include <TimerOne.h>
+                              //  Target board selection
+                              //  Uncomment the board you're compiling for
+//#define ATTINY88            //  MH-Tiny ATtiny88 Micro
+#define ARDUINOUNO            //  Standard Arduino Uno
+//#define ARDUINOUNO_OLED     // Arduino Uno with a fancy OLED display
 
-//  SPI OLED Display 128x64, SSD1306 ibterface
 
-#define SCREEN_WIDTH 128 
-#define SCREEN_HEIGHT 64
-#define OLED_DC     8
-#define OLED_CS     10
-#define OLED_RESET  9
+#ifdef ARDUINOUNO_OLED
+  #include <Adafruit_SSD1306.h>
+  #include <Adafruit_GFX.h>
+  #include <SPI.h>
+  #include <Wire.h>           
+  
+  #define OLED_DC     8       // fancy OLED graphics!
+  #define OLED_CS     10      //  SPI OLED Display 128x64, SSD1306, SPI
+  #define OLED_RESET  9       //  We're using the hardware SPI
+  #define SCREEN_WIDTH 128    // Pin 11 (MOSI) to D1, Pin 13 (SCK) to D0
+  #define SCREEN_HEIGHT 64
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, OLED_DC, OLED_RESET, OLED_CS);
+  Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, OLED_DC, OLED_RESET, OLED_CS);
+#endif
+
 
 
 // Pins and encoder
@@ -44,16 +52,51 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, OLED_DC, OLED_RESET,
 #define RATIO2_PIN 10
 #define RATIO3_PIN 11
 
-// omg we need some serious MUX here!
+//  Multiplexing
 
-void drawInterface();
+/*  omg we need some serious MUX here! Interfacing 15 analog potentiometers and 5 digital inputs
+    Arduino Uno has only 6 ADCs, ATTiny88 has 8
+    We'll use 74HC4047 multiplexer for analog, so it takes:
+    
+    1 ADC pin
+    4 digital pins for addressing specific pots
+    !EN shorted to ground
+
+    not bad
+
+*/
+
+class MultiplexedPots {   //  let's have a class!
+  
+  char a0;                //  adress bus
+  char a1;
+  char a2;
+  char a3;
+  char ADCPin;            // well, that's our analog input
+
+  int potValue;           // ADC returns a 10-bit-long measurement value
+
+  public:
+
+  MultiplexedPots(char a0, char a1, char a2, char a3, char adcPin){ // the class constructor
+    pinMode (a0, OUTPUT);                                           // theoretically should receive all the pin numbers on init
+    pinMode (a1, OUTPUT);                                           // and switch the corresponging pins to output mode
+    pinMode (a2, OUTPUT);                                           
+    pinMode (a3, OUTPUT);
+  }
+
+  int read (char potNumber);                                        // will be implemented somewhere else
+};
+
 
 void setup() {
+  MultiplexedPots pots();
 
 #ifdef MIDI
   Serial1.begin(31250);
 #endif
 
+#ifdef ARDUINOUNO
   // put your setup code here, to run once:
   if(!display.begin(SSD1306_SWITCHCAPVCC)) {
    // Serial.println(F("SSD1306 allocation failed"));
@@ -62,6 +105,8 @@ void setup() {
   display.display();
   delay(2000);
   display.clearDisplay();
+#endif
+
 }
 
 void loop() {
