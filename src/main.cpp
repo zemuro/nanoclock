@@ -10,6 +10,7 @@ partly based on 'Arduino MIDI clock with tap tempo' by DieterVDW (https://github
 #include <Arduino.h>
 #include <TimerOne.h>
 #include "multipots.h"
+#include <GyverTM1637.h>
 
 using namespace Nanoclock;
                               //  Target board selection
@@ -113,12 +114,37 @@ using namespace Nanoclock;
 #define ANALOG_INPUT_PIN A3
 #endif
 
+#ifdef ARDUINOUNO
+#define MAIN_DIO 5
+#define MAIN_CL 6
+#define AUX1_DIO 5
+#define AUX1_CL 6
+#define AUX2_DIO 5
+#define AUX2_CL 6
+#define AUX3_DIO 5
+#define AUX3_CL 6
+#endif
+
+#ifdef ATTINY88
+#define MAIN_DIO 5
+#define MAIN_CL 6
+#define AUX1_DIO 5
+#define AUX1_CL 6
+#define AUX2_DIO 5
+#define AUX2_CL 6
+#define AUX3_DIO 5
+#define AUX3_CL 6
+#endif
+
 //=================================================== Multiplexing 7-segment LEDs
+
+
 
 
 void setup() {
   MultiplexedPots pots(MUX_S0, MUX_S1, MUX_S2, MUX_S3, ANALOG_INPUT_PIN);
-
+  displaysInit(MAIN_DIO, MAIN_CL, AUX1_DIO, AUX1_CL, AUX2_DIO, AUX2_CL, AUX3_DIO, AUX3_CL);
+  displaysClear();
 #ifdef MIDI
   Serial1.begin(31250);
 #endif
