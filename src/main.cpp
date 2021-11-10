@@ -9,94 +9,121 @@ partly based on 'Arduino MIDI clock with tap tempo' by DieterVDW (https://github
 
 #include <Arduino.h>
 #include <TimerOne.h>
+#include "multipots.h"
+
+using namespace Nanoclock;
                               //  Target board selection
                               //  Uncomment the board you're compiling for
 //#define ATTINY88            //  MH-Tiny ATtiny88 Micro
 #define ARDUINOUNO            //  Standard Arduino Uno
-//#define ARDUINOUNO_OLED     // Arduino Uno with a fancy OLED display
+//#define OLED                //  Arduino Uno with a fancy OLED display
+//#define MIDI                //  Use MIDI clock
+//#define TAPBPM              //  TAP TEMPO button
+//#define BLINKERS            //  1 blinking LED for master clock, 3 LEDs for auxillary channels
+//#define BPM_ENCODER         //  would be logical to change tempo with an encoder (two input pins)
+//#define RATIOS_ENCODERS     //  change AUX dividers with encoders (six input pins)
 
 
-#ifdef ARDUINOUNO_OLED
-  #include <Adafruit_SSD1306.h>
-  #include <Adafruit_GFX.h>
-  #include <SPI.h>
-  #include <Wire.h>           
-  
-  #define OLED_DC     8       // fancy OLED graphics!
-  #define OLED_CS     10      //  SPI OLED Display 128x64, SSD1306, SPI
-  #define OLED_RESET  9       //  We're using the hardware SPI
-  #define SCREEN_WIDTH 128    // Pin 11 (MOSI) to D1, Pin 13 (SCK) to D0
+#ifdef OLED          //  OLED display for graphical menus, replaces BPM indicator
+  #include <Adafruit_SSD1306.h> //  for future advanced model with multiple options
+  #include <Adafruit_GFX.h>     //  like MIDI CLOCK sync options, trigger/gate sync
+  #include <SPI.h>              //  configuring PPQN and whatnot
+  #include <Wire.h>             //
+  #define OLED_DC     8       //
+  #define OLED_CS     10        //  SPI OLED Display 128x64, SSD1306, SPI
+  #define OLED_RESET  9         //  We're using the hardware SPI
+  #define SCREEN_WIDTH 128      // Pin 11 (MOSI) to D1, Pin 13 (SCK) to D0
   #define SCREEN_HEIGHT 64
 
   Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, OLED_DC, OLED_RESET, OLED_CS);
 #endif
 
+//================================================== Muxed potentiometers
 
+//#define PW                    //uncomment for PULSE WIDTH inputs
+#ifdef PW
+#endif
 
-// Pins and encoder
+//#define SWING                 //uncomment for SWING
+#ifdef SWING
+#define MAIN_SWING_POT 
+#define AUX1_SWING_POT 
+#define AUX2_SWING_POT 
+#define AUX3_SWING_POT
+#endif
 
-#define RESET_IN_PIN 1          // RESET  (a switch and an input - Diode gates)
-#define RUN_IN_PIN 2            // RUN/STOP 
-#define RESET_OUT_PIN 123       //
+//================================================== Input pins (buttons)
+
+#define RESET_PIN 1             //  RESET button and trigger input  (diode "or" gate)
+#define RUN_PIN 2               //  RUN/STOP button and trigger input (diode "or" gate)
+
+#define ADC_PIN 15
+
+/*                              //  Reserved for future advanced mode
+#define MODE_MINUS_PIN 3        //  EXTERNAL SYNC MODE -
+#define MODE_PLUS_PIN 4         //  EXTERNAL SYNC MODE +
+*/
+
+//=================================================== Encoders
+
+#ifdef BPM_ENCODER
+#define ENC_BPM_PIN1
+#define ENC_BPM_PIN2
+#endif
+
+#ifdef RATIOS_ENCODERS
+#define ENC_AUX1_PIN1
+#define ENC_AUX1_PIN2
+#define ENC_AUX2_PIN1
+#define ENC_AUX2_PIN2
+#define ENC_AUX3_PIN1
+#define ENC_AUX3_PIN2
+#endif  
+
+/*
+#define RESET_OUT_PIN 123       //  forward RESET and RUN signals (may be done electrically)  
 #define RUN_OUT_PIN 12          //
+*/
 
+#ifdef TAPBPM
 #define TAP_PIN 3               // Tap tempo button
+#endif
+
+//===================================================  Output pins
 
 #define OUT_MAIN_PIN 4          // Main out - 4th? 8th? 16th? we need a divider somewhere!
-
 #define OUT1_PIN 5              // Auxillary outputs
 #define OUT2_PIN 6
 #define OUT3_PIN 7
 
-#define RATIO1_PIN 9             // AUX outs ratios - potentiometers on analog pins
-#define RATIO2_PIN 10
-#define RATIO3_PIN 11
+//==================================================== MUXed pots
+#ifdef ARDUINOUNO
+#define MUX_S0  2   // Select Arduino pins 2 to 5 for addressing individual pots
+#define MUX_S1  3   // 
+#define MUX_S2  4
+#define MUX_S3  5
+#define ANALOG_INPUT_PIN  A3  // Potentiometer value
+#endif
 
-//  Multiplexing
+#ifdef ATTINY88
+#define MUX_S0  3
+#define MUX_S1  4
+#define MUX_S2  5 
+#define MUX_S3  6
+#define ANALOG_INPUT_PIN A3
+#endif
 
-/*  omg we need some serious MUX here! Interfacing 15 analog potentiometers and 5 digital inputs
-    Arduino Uno has only 6 ADCs, ATTiny88 has 8
-    We'll use 74HC4047 multiplexer for analog, so it takes:
-    
-    1 ADC pin
-    4 digital pins for addressing specific pots
-    !EN shorted to ground
-
-    not bad
-
-*/
-
-class MultiplexedPots {   //  let's have a class!
-  
-  char a0;                //  adress bus
-  char a1;
-  char a2;
-  char a3;
-  char ADCPin;            // well, that's our analog input
-
-  int potValue;           // ADC returns a 10-bit-long measurement value
-
-  public:
-
-  MultiplexedPots(char a0, char a1, char a2, char a3, char adcPin){ // the class constructor
-    pinMode (a0, OUTPUT);                                           // theoretically should receive all the pin numbers on init
-    pinMode (a1, OUTPUT);                                           // and switch the corresponging pins to output mode
-    pinMode (a2, OUTPUT);                                           
-    pinMode (a3, OUTPUT);
-  }
-
-  int read (char potNumber);                                        // will be implemented somewhere else
-};
+//=================================================== Multiplexing 7-segment LEDs
 
 
 void setup() {
-  MultiplexedPots pots();
+  MultiplexedPots pots(MUX_S0, MUX_S1, MUX_S2, MUX_S3, ANALOG_INPUT_PIN);
 
 #ifdef MIDI
   Serial1.begin(31250);
 #endif
 
-#ifdef ARDUINOUNO_OLED
+#ifdef OLED
   // put your setup code here, to run once:
   if(!display.begin(SSD1306_SWITCHCAPVCC)) {
    // Serial.println(F("SSD1306 allocation failed"));
