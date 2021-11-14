@@ -10,6 +10,7 @@ partly based on 'Arduino MIDI clock with tap tempo' by DieterVDW (https://github
 #include <Arduino.h>
 #include <TimerOne.h>
 #include "multipots.h"
+#include "displays.h"
 #include <GyverTM1637.h>
 
 using namespace Nanoclock;
@@ -142,9 +143,12 @@ using namespace Nanoclock;
 
 
 void setup() {
+  
   MultiplexedPots pots(MUX_S0, MUX_S1, MUX_S2, MUX_S3, ANALOG_INPUT_PIN);
-  displaysInit(MAIN_DIO, MAIN_CL, AUX1_DIO, AUX1_CL, AUX2_DIO, AUX2_CL, AUX3_DIO, AUX3_CL);
-  displaysClear();
+  DisplaysCombo displays(MAIN_DIO, MAIN_CL, AUX1_DIO, AUX1_CL, AUX2_DIO, AUX2_CL, AUX3_DIO, AUX3_CL);
+  
+  displays.clear();   //
+
 #ifdef MIDI
   Serial1.begin(31250);
 #endif
