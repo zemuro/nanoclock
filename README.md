@@ -6,8 +6,11 @@ Basically, a hardware clone of https://github.com/MarcBoule/ImpromptuModular/#cl
 
 ![Impromptu Clocked panel](https://library.vcvrack.com/screenshots/ImpromptuModular/Clocked.png)
 
-Used some code and ideas from https://github.com/DieterVDW/arduino-midi-clock,
-C++ reference https://en.cppreference.com/w/
-Great help and encouragement from the Stack Overflow community (never had to post though, but found a plethora of good solutions)
+Used some code and ideas from https://github.com/DieterVDW/arduino-midi-clock  
+  
+Tools and instruments:
 
-made in Visual Studio Code and PlatformIO
+C++ reference https://en.cppreference.com/w/  
+Great help and encouragement from the Stack Overflow community (never had to post though, but found a plethora of good solutions)  
+Visual Studio Code  
+PlatformIO  
