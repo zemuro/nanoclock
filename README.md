@@ -4,7 +4,7 @@ An Arduino MIDI/trigger/gate master clock
 
 Basically, a hardware clone of https://github.com/MarcBoule/ImpromptuModular/#clocked
 
-![Impromptu Clocked panel](https://library.vcvrack.com/screenshots/ImpromptuModular/Clocked.png)
+![Impromptu Clocked panel](https://library.vcvrack.com/screenshots/ImpromptuModular/Clocked.png !width=200)
 
 Used some code and ideas from https://github.com/DieterVDW/arduino-midi-clock  
   
