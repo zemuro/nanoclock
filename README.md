@@ -4,6 +4,13 @@ An Arduino MIDI/trigger/gate master clock
 
 Basically, a hardware clone of https://github.com/MarcBoule/ImpromptuModular/#clocked
 
-Used some code and ideas from https://github.com/DieterVDW/arduino-midi-clock,
-C++ reference https://en.cppreference.com/w/
-Great help and encouragement from the Stack Overflow community (never had to post though, but found a plethora of good solutions)
+<img src="https://library.vcvrack.com/screenshots/ImpromptuModular/Clocked.png" width="30%">
+
+Used some code and ideas from https://github.com/DieterVDW/arduino-midi-clock  
+  
+Tools and instruments:
+
+C++ reference https://en.cppreference.com/w/  
+Great help and encouragement from the Stack Overflow community (never had to post though, but found a plethora of good solutions)  
+Visual Studio Code  
+PlatformIO  
