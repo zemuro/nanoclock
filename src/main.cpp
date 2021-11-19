@@ -9,15 +9,21 @@ partly based on 'Arduino MIDI clock with tap tempo' by DieterVDW (https://github
 
 #include <Arduino.h>
 #include <TimerOne.h>
+#include "main.h"
 #include "multipots.h"
 #include "displays.h"
+#include "taptempo.h"
 #include <GyverTM1637.h>
 
 using namespace Nanoclock;
+
+
                               //  Target board selection
                               //  Uncomment the board you're compiling for
 //#define ATTINY88            //  MH-Tiny ATtiny88 Micro
 #define ARDUINOUNO            //  Standard Arduino Uno
+//#define ARDUINOPROMICRO     //  Arduino 
+
 //#define OLED                //  Arduino Uno with a fancy OLED display
 //#define MIDI                //  Use MIDI clock
 //#define TAPBPM              //  TAP TEMPO button
@@ -87,10 +93,21 @@ using namespace Nanoclock;
 #define RUN_OUT_PIN 12          //
 */
 
-#ifdef TAPBPM
+#define MIN_BPM 30
+#define MAX_BPM 260
+
+#define TAP_TEMPO
+#ifdef  TAP_TEMPO
 #define TAP_PIN 3               // Tap tempo button
+#define TAP_POLARITY RISING
+#define MINIMUM_TAPS 3
+#define EXIT_MARGIN 150
 #endif
 
+//#define POT_TEMPO
+#ifdef POT_TEMPO
+#define TEMPO_POT 3
+#endif
 //===================================================  Output pins
 
 #define OUT_MAIN_PIN 4          // Main out - 4th? 8th? 16th? we need a divider somewhere!
@@ -137,40 +154,23 @@ using namespace Nanoclock;
 #define AUX3_CL 6
 #endif
 
-//=================================================== Multiplexing 7-segment LEDs
-
-
-
-
 void setup() {
   
   MultiplexedPots pots(MUX_S0, MUX_S1, MUX_S2, MUX_S3, ANALOG_INPUT_PIN);
   DisplaysCombo displays(MAIN_DIO, MAIN_CL, AUX1_DIO, AUX1_CL, AUX2_DIO, AUX2_CL, AUX3_DIO, AUX3_CL);
+  TapButton tapbutton(TAP_PIN, MIN_BPM, MAX_BPM, MINIMUM_TAPS, TAP_POLARITY, EXIT_MARGIN);
   
-  displays.clear();   //
-
-#ifdef MIDI
-  Serial1.begin(31250);
-#endif
-
-#ifdef OLED
-  // put your setup code here, to run once:
-  if(!display.begin(SSD1306_SWITCHCAPVCC)) {
-   // Serial.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever
-  }
-  display.display();
-  delay(2000);
-  display.clearDisplay();
-#endif
-
-}
+  displays.clear();  
+};
 
 void loop() {
   long now = micros();
-  /*
-   check the RUN switch
-   check the interface pins
+ if (tapbutton.CheckTapButton()){
+    updateBpm();
+  }
 
-*/
-}
+};
+
+void updateBpm(){
+
+};
