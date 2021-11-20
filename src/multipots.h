@@ -1,6 +1,6 @@
 #pragma once
-#ifndef NANOCLOCK_H
-#define NANOCLOCK_H    
+#ifndef MULTIPOTS_H
+#define MULTIPOTS_H    
 
 namespace Nanoclock{
 
