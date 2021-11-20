@@ -18,9 +18,10 @@ static volatile long avgTapInterval;
 static int minimumTaps;
 static int tapPin;
 static long exitMargin;
+
 public:
-    TapButton(int, long, long, int, int, long);   //  The constructed object works for itself
-    static bool CheckTapButton();    //  Like that
+    TapButton(int, long, long, int, int, long);     //  The object
+    static bool CheckTapButton();                   //  true if user has finished tapping the new tempo
 };
 };
 #endif

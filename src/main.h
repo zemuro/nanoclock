@@ -1,12 +1,17 @@
 #pragma once
 #ifndef MAIN_H
 #define MAIN_H  
+#include <TimerOne.h>
+#include "nanoclock_configuration.h"
+#include "displays.h"
+#include "taptempo.h"
+#include "clock.h"
+#include <GyverTM1637.h>
 namespace Nanoclock{
 
 static void updateBpm(long);
 
 TapButton tapbutton;
-MultiplexedPots pots;
 DisplaysCombo displays;
 
 static int bpm;
