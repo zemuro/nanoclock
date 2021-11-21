@@ -12,5 +12,5 @@ Tools and instruments:
 
 C++ reference https://en.cppreference.com/w/  
 Great help and encouragement from the Stack Overflow community (never had to post anything myself, but found a plethora of good solutions)  
-Visual Studio Code  https://github.com/microsoft/vscode
+Visual Studio Code  https://github.com/microsoft/vscode  
 PlatformIO  https://github.com/platformio/platformio-core
