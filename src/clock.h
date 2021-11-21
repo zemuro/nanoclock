@@ -3,7 +3,7 @@
 #define CLOCK_H    
 #include <TimerOne.h>
 
-namespace Nanoclock{
+
     #define MAIN 0
     #define AUX1 1
     #define AUX2 2
@@ -22,9 +22,18 @@ namespace Nanoclock{
         //static uint8_t clocksPerBeat;
         static long intervalMicroseconds;
         static void update(uint8_t);
-        static uint8_t bpm;                                         // tenths of BPM
-        static void sendClock();
+        static uint8_t bpm;                         // bpm is in tenths of BPM
+        static void sendClock();                    // all the magic happens here
         static bool playing;
+
+        static long mainCounter;                    // incremental counters
+        static long aux1Counter;
+        static long aux2Counter;
+        static long aux3Counter;
+        static long mainPeriod;                     // period lengths, set by divisors
+        static long aux1Period;
+        static long aux2Period;
+        static long aux2Period;
 
         static uint8_t mainPW;
         static uint8_t mainSwing;
@@ -45,24 +54,17 @@ namespace Nanoclock{
         public:
         Clock ();      // a class constructor
 
-
+        static void initialize (uint8_t);
         static void reset ();
         static void startStop ();
         static void setBpm (uint8_t);
 
-     /* static void setDivisor (uint8_t);
+        /* static void setDivisor (uint8_t);
         static void setMainPW (uint8_t);
         static void setSwing (uint8_t);*/
-
-        static void changeBpm (uint8_t);
-        static void changePulseWidth (uint8_t, uint8_t);
-        static void changeSwing (uint8_t, uint8_t);
-        static void changeDelay (uint8_t, uint8_t);
-        static void changeDivisor (uint8_t, uint8_t);
 
         //  changeParameter (targer, parameter, value)
         static void changeParameter (uint8_t , uint8_t, char);
 
-};
 };
 #endif

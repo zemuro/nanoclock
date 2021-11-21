@@ -3,7 +3,7 @@
 #define MAIN_H  
 #include <TimerOne.h>
 #include "nanoclock_configuration.h"
-#include "displays.h"
+//#include "displays.h"
 #include "taptempo.h"
 #include "clock.h"
 #include <GyverTM1637.h>
@@ -12,15 +12,13 @@
 
 namespace Nanoclock{
 
-static void updateBpm(long);
-
-
 TapTempo tapbutton;
-DisplaysCombo displays;
+GyverTM1637 display;
 
-static int bpm;
-static int encoderMode;
-static int main_PW;
+
+static uint8_t bpm;
+static uint8_t encoderMode;
+static uint8_t main_PW;
 bool encoderRead;
 static volatile long now;
 

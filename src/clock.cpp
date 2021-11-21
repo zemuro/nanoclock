@@ -54,17 +54,15 @@ so 40 basic divisions will go like this: (oh hell, I definetely need an encoder)
 #define MIDI_START 0xFA
 #define MIDI_STOP 0xFC
 
-using namespace Nanoclock;
-
-Clock::Clock(){                                             // construct and initialize an object
-    Timer1.initialize(intervalMicroseconds);                // value is 1000000 by default
+Clock::Clock(){                                                 // construct and initialize an object
+    Timer1.initialize(intervalMicroseconds);                    // value is 1000000 by default
     Timer1.setPeriod(calculateIntervalMicroSecs(bpm));
     Timer1.attachInterrupt(sendClock);
 
 }
 
 long Clock::calculateIntervalMicroSecs(uint8_t _bpm) {          // Take care about overflows!
-  return 60L * 1000 * 1000 * 10 / bpm / CLOCKS_PER_BEAT;    // ok
+  return 60L * 1000 * 1000 * 10 / bpm / CLOCKS_PER_BEAT;        // ok
 }
 
 void Clock::update (uint8_t bpm){

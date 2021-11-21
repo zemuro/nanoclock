@@ -10,17 +10,20 @@ partly based on 'Arduino MIDI clock with tap tempo' by DieterVDW (https://github
 #include <Arduino.h>
 #include "main.h"
 
-
-
 using namespace Nanoclock;
-MD_UISwitch_4017KM buttons(16, BUTTONS_2017_CLK, BUTTONS_2017_KEY, BUTTONS_2017_RST);
-TapTempo tapbutton(TAP_PIN, MIN_BPM, MAX_BPM, TAP_POLARITY);
-Clock clock;
-MD_REncoder encoder = MD_REncoder(ENC_PIN_A, ENC_PIN_B);
+
+// Firstly, let's instantiate the objects
+
+MD_UISwitch_4017KM buttons(16, BUTTONS_2017_CLK, BUTTONS_2017_KEY, BUTTONS_2017_RST); // the button matrix
+TapTempo tapbutton(TAP_PIN, MIN_BPM, MAX_BPM, TAP_POLARITY);                          // the tap tempo/ALT button
+Clock clock;                                                                          // the clock (parameters, timers, math and outputs)
+MD_REncoder encoder = MD_REncoder(ENC_PIN_A, ENC_PIN_B);                              // the encoder
+GyverTM1637 display(MAIN_DISPLAY_CL, MAIN_DISPLAY_DIO);                               // well, it's kinda self-descriptory
+
+// and initialize the variables
 
 void setup() {
-  
-  //DisplaysCombo displays(MAIN_DIO, MAIN_CL, AUX1_DIO, AUX1_CL, AUX2_DIO, AUX2_CL, AUX3_DIO, AUX3_CL);
+  bpm = DEFAULT_BPM;
   buttons.begin();
   buttons.enableDoublePress (false);
   buttons.enableLongPress (false);
@@ -29,18 +32,19 @@ void setup() {
 
   encoder.begin();
   encoder.setPeriod(ENCODER_PERIOD);
+  clock.initialize (bpm);
 };
 
 void loop() {
-  MD_UISwitch::keyResult_t key = buttons.read();
-  if (key != MD_UISwitch::KEY_NULL)             // no key = no input
-    if (key == MD_UISwitch::KEY_UP)
+  MD_UISwitch::keyResult_t key = buttons.read();// let's check out these buttons (will move this code to some class later)
+  if (key != MD_UISwitch::KEY_NULL)             // if some button state changed..
+    if (key == MD_UISwitch::KEY_UP)             // oh, a depressed button
       {
-        encoderMode = MAIN_TEMPO;
+        encoderMode = MAIN_TEMPO;               // return to the default mode
       }
-      else{                                     // key presed or repeatedly pressed etc
-        uint8_t keyNumber = buttons.getKey();   //let's find out what's pressed and act accordingly
-        switch (keyNumber){                     // key index [0-15] - keys defined at nanoclock_configuration.h
+      else{                                     // well, some key was pressed
+        uint8_t keyNumber = buttons.getKey();   // let's find out what button
+        switch (keyNumber){                     // and select a parameter 
           case KEY_RUN: {
             clock.startStop();                  // RUN key pressed
             break;}
@@ -93,22 +97,22 @@ void loop() {
         }
         }
   
-        uint8_t encoderData = encoder.read();
-        if(encoderData){
-          uint8_t encoderSpeed = encoder.speed();             //
-          char changeValue = adaptiveChange(encoderData, encoderSpeed);
-          switch (encoderMode){
+        uint8_t encoderData = encoder.read();                           // returns zero if nothing happened, DIR_CW or DIR_CCW for clockwise or counterclockwise rotation
+        if(encoderData){                                                // not zero?
+          uint8_t encoderSpeed = encoder.speed();                       // returns encoder speed in clicks per second, usually in the range 0..59
+          char changeValue = adaptiveChange(encoderData, encoderSpeed); // returns increment or decrement value (SIGNED)
+          switch (encoderMode){                                         // now we find out what parameter gets changed (determined by scanning the keyboard)
             case MAIN_TEMPO: {
-              clock.changeParameter (MAIN, TEMPO, changeValue);
+              clock.changeParameter (MAIN, TEMPO, changeValue);         // and now we politely ask the clock to change the tempo etc
               break;
             }
             case MAIN_PW: {
-              clock.changeParameter (MAIN, PW, changeValue);
-              break;
-            }
-            case MAIN_SWING: {
-              clock.changeParameter (MAIN, SWING, changeValue);
-              break;
+              clock.changeParameter (MAIN, PW, changeValue);            // All this will be encapsulated in some class, when I've figured out which exactly
+              break;                                                    // Maybe class Interface
+            }                                                           //
+            case MAIN_SWING: {                                          // interface.parseButtons() or interface.checkEncoder()
+              clock.changeParameter (MAIN, SWING, changeValue);         // 
+              break;                                                    //
             }
             case AUX1_SWING: {
               clock.changeParameter (AUX1, SWING, changeValue);
@@ -137,6 +141,11 @@ void loop() {
             default: break;
           }
         }
+  
+  // and now we show the value
+  // omg here goes the display class
+  // or actually che clock... like clock.refreshDisplay() or something
+
 };
 
 char adaptiveChange (uint8_t direction, uint8_t speed){

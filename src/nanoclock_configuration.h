@@ -10,6 +10,7 @@
 
 #define MIN_BPM 30
 #define MAX_BPM 260
+#define DEFAULT_BPM 100
 
 
 //#define POT_TEMPO
