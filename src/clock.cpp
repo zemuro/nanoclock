@@ -63,11 +63,11 @@ Clock::Clock(){                                             // construct and ini
 
 }
 
-long Clock::calculateIntervalMicroSecs(int _bpm) {          // Take care about overflows!
+long Clock::calculateIntervalMicroSecs(uint8_t _bpm) {          // Take care about overflows!
   return 60L * 1000 * 1000 * 10 / bpm / CLOCKS_PER_BEAT;    // ok
 }
 
-void Clock::update (int bpm){
+void Clock::update (uint8_t bpm){
     long interval = calculateIntervalMicroSecs(bpm);
     Timer1.setPeriod(interval);
 }

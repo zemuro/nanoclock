@@ -1,9 +1,13 @@
 #pragma once
 #ifndef TAPBUTTON_H
 #define TAPBUTTON_H  
+
+#define EXIT_MARGIN 150
+#define MINIMUM_TAPS 3
+
 namespace Nanoclock{
 
-class TapButton {        
+class TapTempo {        
                         
 private:
 
@@ -20,8 +24,9 @@ static int tapPin;
 static long exitMargin;
 
 public:
-    TapButton(int, long, long, int, int, long);     //  The object
-    static bool CheckTapButton();                   //  true if user has finished tapping the new tempo
+    // TapTempo (pin, minBPM, maxBPM, tapPolarity)
+    TapTempo(int, long, long, int);
+    static bool CheckTapButton();    //  true if user has finished tapping the new tempo
 };
 };
 #endif

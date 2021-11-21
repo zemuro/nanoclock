@@ -4,7 +4,7 @@
 #include "main.h"
 using namespace Nanoclock;
 
-TapButton::TapButton(int pin, long minBpm, long maxBpm, int minTaps, int tapPolarity, long exitMrgn)        // we make an object
+TapTempo::TapTempo(int pin, long minBpm, long maxBpm, int tapPolarity)        // we make an object
 {
     minimalTapInterval = 60L * 1000 * 1000 * 10 / maxBpm;
     maximumTapInterval = 60L * 1000 * 1000 * 10 / minBpm;
@@ -12,12 +12,12 @@ TapButton::TapButton(int pin, long minBpm, long maxBpm, int minTaps, int tapPola
     firstTapTime = 0;
     lastTapTime = 0;
     timesTapped = 0;
-    exitMargin = exitMrgn;
-    minimumTaps = minTaps;
-    attachInterrupt(digitalPinToInterrupt(tapPin), TapButton::tapInput, tapPolarity);  
+    exitMargin = EXIT_MARGIN;
+    minimumTaps = MINIMUM_TAPS;
+    attachInterrupt(digitalPinToInterrupt(tapPin), TapTempo::tapInput, tapPolarity);
 }
 
-void TapButton::tapInput(){     //  a static method, every time tap happens
+void TapTempo::tapInput(){ //  a static method, every time tap happens
    if (Nanoclock::now - lastTapTime < minimalTapInterval) {     // too little time
     return;                                         // Debounce done
   }
@@ -31,7 +31,7 @@ void TapButton::tapInput(){     //  a static method, every time tap happens
   // Serial.println("Tap!");
 }
 
-bool TapButton::CheckTapButton(){ /* Handle tapping of the tap tempo button*/
+bool TapTempo::CheckTapButton(){ /* Handle tapping of the tap tempo button*/
 
   if (timesTapped > 0 && timesTapped < minimumTaps && (now - lastTapTime) > maximumTapInterval) {
                 
