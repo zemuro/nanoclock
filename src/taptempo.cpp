@@ -8,8 +8,7 @@ TapTempo::TapTempo(uint8_t pin, long minBpm, long maxBpm, uint8_t tapPolarity): 
     firstTapTime = 0;
     lastTapTime = 0;
     timesTapped = 0;
-    minimumTaps = MINIMUM_TAPS;
-    held = false;
+    isHeld = false;
     }
 
 bool TapTempo::check(){                                           /* Handle tapping of the tap tempo button*/
@@ -22,29 +21,29 @@ bool TapTempo::check(){                                           /* Handle tapp
       break;
     }
     case MD_UISwitch::KEY_UP: {
-      held = false;                                               // Hold determines the OPTION key behaviour
+      isHeld = false;                                               // Hold determines the OPTION key behaviour
       break;
     }
     case MD_UISwitch::KEY_DOWN: {                                 // At last, a keypress
-      if (!held)                                                  // and the button has been released since last keypress
+      if (!isHeld)                                                  // and the button has been released since last keypress
       {
-        if (timesTapped > 0 && timesTapped < minimumTaps && (now - lastTapTime) > maximumTapInterval) {  // Single taps, not enough to calculate BPM -> ignore!
+        if (timesTapped > 0 && timesTapped < MINIMUM_TAPS && (now - lastTapTime) > maximumTapInterval) {  // Single taps, not enough to calculate BPM -> ignore!
         timesTapped = 0;                                                   
-        held = true;      
+        isHeld = true;      
         return false;
-        } else if (timesTapped >= minimumTaps) {                              // enough taps for calculating a new tempo
+        } else if (timesTapped >= MINIMUM_TAPS) {                              // enough taps for calculating a new tempo
         avgTapInterval = (lastTapTime - firstTapTime) / (timesTapped - 1);
         if ((now - lastTapTime) > (avgTapInterval * EXIT_MARGIN / 100)) {    // If taps are consistent enough
           newTempo = 60L * 1000 * 1000 * 10 / avgTapInterval;               // Convert interval to tempo in BPM
-          held = true;                                                      //
+          isHeld = true;                                                      //
           return true;
         } else{
           timesTapped = 0;                                                  // Reset taps counter
-          held = true;
+          isHeld = true;
           return false;
         }} else{                                                            // not enough taps
         timesTapped++;
-        held = true;
+        isHeld = true;
         return false;  
         }
       }

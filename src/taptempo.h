@@ -3,8 +3,6 @@
 #define TAPBUTTON_H  
 #include <Arduino.h>
 #include <MD_UISwitch.h>
-//#define EXIT_MARGIN 150
-//#define MINIMUM_TAPS 3
 
 class TapTempo {  
     public:
@@ -28,12 +26,11 @@ class TapTempo {
     static long minimalTapInterval;                 //  we'll need a single class instance
     static long maximumTapInterval;                 //  and the attachInterrupt() works only with static functions
     static volatile long avgTapInterval;
-    static int minimumTaps;
 
     public:
 
-    bool check();                               //  true if user has finished tapping the new tempo
-    static int newTempo;                        // 
-    static bool held;                           //  used for SHIFT button behaviour
+    bool check();                                   //  true if user has finished tapping the new tempo
+    static int newTempo;                            // 
+    static bool isHeld;                               //  used for SHIFT button behaviour
 };
 #endif

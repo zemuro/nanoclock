@@ -41,39 +41,10 @@
     #define BUTTONS_2017_KEY    12
     #define BUTTONS_2017_RST    13
 
-        #define KEY_RUN         0
-        #define KEY_RESET       1
-        #define KEY_PW          2
-        #define KEY_SWING       3
-        #define AUX1_DIVISOR    4
-        #define AUX1_PW         5
-        #define AUX1_SWING      6
-        #define AUX1_DELAY      7
-        #define AUX2_DIVISOR    8
-        #define AUX2_PW         9
-        #define AUX2_SWING      10
-        #define AUX2_DELAY      11
-        #define AUX3_DIVISOR    12
-        #define AUX3_PW         13
-        #define AUX3_SWING      14
-        #define AUX3_DELAY      15
-
-    //#define FOUR_DUSPLAYS     // one display for each aux
-    #ifdef FOUR_DISPLAYS
-        #define MAIN_DIO 5      // 4 x 4x7-segment displays (8 digital pins)
-        #define MAIN_CL 6       // actually a single display could be used (function buttons select a visible parameter, changeable with an encoder)
-        #define AUX1_DIO 5      // 2 pins
-        #define AUX1_CL 6
-        #define AUX2_DIO 5
-        #define AUX2_CL 6
-        #define AUX3_DIO 5
-        #define AUX3_CL 6
-    #endif
-
     #define SINGLE_DISPLAY
     #ifdef SINGLE_DISPLAY
-        #define MAIN_DISPLAY_DIO 9      // 4 x 4x7-segment displays (8 digital pins)
-        #define MAIN_DISPLAY_CL 10       // actually a single display could be used (function buttons select a visible parameter, changeable with an encoder)
+        #define DISPLAY_DIO 9      // 4 x 4x7-segment displays (8 digital pins)
+        #define DISPLAY_CL 10       // actually a single display could be used (function buttons select a visible parameter, changeable with an encoder)
     #endif
 
     #define ENC_PIN_A   1       // encoder pins (2 digital pins)
@@ -87,7 +58,7 @@
     #define TAP_TEMPO
         #ifdef  TAP_TEMPO
         #define TAP_PIN 3               // Tap tempo button (1 digital pin) 
-        #define TAP_POLARITY RISING
+        #define TAP_POLARITY LOW
 
     #endif
                             // 15 to 11 pins required
