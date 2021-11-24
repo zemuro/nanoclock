@@ -13,23 +13,23 @@ partly based on 'Arduino MIDI clock with tap tempo' by DieterVDW (https://github
 //using namespace Nanoclock;
 
 PhysicalInterface physicalInterface(16, BUTTONS_2017_CLK, BUTTONS_2017_KEY, BUTTONS_2017_RST, ENC_PIN_A, ENC_PIN_B, DISPLAY_CL, DISPLAY_DIO); 
-TapTempo tapButton(TAP_PIN, MIN_BPM, MAX_BPM, TAP_POLARITY);                // the tap tempo/OPTION button
-Clock clock;                                                                // the clock (parameters, timers, math and outputs)
+TapTempo tapButton(TAP_PIN, MIN_BPM, MAX_BPM, TAP_POLARITY);
+Clock clock;   // tick tock
 
 void setup() {
   };
 
 void loop() {
-  if (tapButton.check()){
-    clock.setBpm(tapButton.newTempo);
+  if (tapButton.check()){                                                                                     // User set a new tempo by tapping a button?
+    clock.setBpm(tapButton.newTempo);                                                                         // Change the global tempo
   }       
 
-  currentMode = (physicalInterface.checkButtons(tapButton.isHeld)) ? physicalInterface.option : MAIN_TEMPO;
+  currentMode = (physicalInterface.checkButtons(tapButton.isHeld)) ? physicalInterface.option : MAIN_TEMPO;   // main tempo or what button is currently pressed
   
-  if (physicalInterface.checkEncoder()){
+  if (physicalInterface.checkEncoder()){                                                                      // someone rotated the encoder
       clock.changeParameter(currentMode, physicalInterface.encoderValue);
   }
   
-  physicalInterface.updateDisplay();
+  physicalInterface.updateDisplay();                                                                          // **blink**
   
 }
