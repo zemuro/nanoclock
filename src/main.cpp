@@ -15,7 +15,7 @@ using namespace Nanoclock;
 // Firstly, let's instantiate the objects
 
 MD_UISwitch_4017KM buttons(16, BUTTONS_2017_CLK, BUTTONS_2017_KEY, BUTTONS_2017_RST); // the button matrix
-TapTempo tapbutton(TAP_PIN, MIN_BPM, MAX_BPM, TAP_POLARITY);                          // the tap tempo/ALT button
+TapTempo tap(TAP_PIN, MIN_BPM, MAX_BPM, TAP_POLARITY);                                // the tap tempo/OPTION button
 Clock clock;                                                                          // the clock (parameters, timers, math and outputs)
 MD_REncoder encoder = MD_REncoder(ENC_PIN_A, ENC_PIN_B);                              // the encoder
 GyverTM1637 display(MAIN_DISPLAY_CL, MAIN_DISPLAY_DIO);                               // well, it's kinda self-descriptory
@@ -36,6 +36,13 @@ void setup() {
 };
 
 void loop() {
+  //                                                Update the TAP/OPTION button
+  tap.refresh();
+  if (tap.newTempo){
+      clock.setBpm (tap.tempo);
+      tap.newTempo = false;
+  }
+  //                                                Read and parse the buttons
   MD_UISwitch::keyResult_t key = buttons.read();// let's check out these buttons (will move this code to some class later)
   if (key != MD_UISwitch::KEY_NULL)             // if some button state changed..
     if (key == MD_UISwitch::KEY_UP)             // oh, a depressed button
@@ -52,6 +59,10 @@ void loop() {
             clock.reset();                      // Reset
             break;}
           case KEY_PW: {
+            if (tap.hold){                      // OPTION + PW button held = change the main divisor
+              encoderMode = MAIN_DIVISOR;
+              break;
+            }
             encoderMode = MAIN_PW;
             break;} 
           case KEY_SWING: {
@@ -145,6 +156,11 @@ void loop() {
   // and now we show the value
   // omg here goes the display class
   // or actually che clock... like clock.refreshDisplay() or something
+
+  // oh fuck, we need blinking LEDs or sonething
+  // blinking decimal points - no, a single display
+  // fuck fuck
+  // max7219 needs 3 pins
 
 };
 

@@ -37,6 +37,7 @@ class outputChannel{
     int counter1, counter2, pulseCounter;
 
     public:
+    outputChannel ();                                               // default constructor
     outputChannel (uint8_t, uint8_t, long, char, uint8_t, long);    // outputChannel (uint8_t index, uint8_t pin, long period, char swing, uint8_t pulse_width, long delay);
     outputChannel (uint8_t, uint8_t);                               // outputChannel (channelIndex, channelPin)
     void reset ();

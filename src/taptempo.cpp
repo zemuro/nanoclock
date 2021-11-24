@@ -1,55 +1,55 @@
-#include <Arduino.h>
 #include "taptempo.h"
-#include <TimerOne.h>
-#include "main.h"
-using namespace Nanoclock;
 
-TapTempo::TapTempo(int pin, long minBpm, long maxBpm, int tapPolarity)        // we make an object
-{
+TapTempo::TapTempo(uint8_t pin, long minBpm, long maxBpm, uint8_t tapPolarity): tapButton(pin, tapPolarity){
     minimalTapInterval = 60L * 1000 * 1000 * 10 / maxBpm;
     maximumTapInterval = 60L * 1000 * 1000 * 10 / minBpm;
-    tapPin = pin;
+    now = micros();
+    tapButton.begin();
     firstTapTime = 0;
     lastTapTime = 0;
     timesTapped = 0;
-    exitMargin = EXIT_MARGIN;
     minimumTaps = MINIMUM_TAPS;
-    attachInterrupt(digitalPinToInterrupt(tapPin), TapTempo::tapInput, tapPolarity);
-}
-
-void TapTempo::tapInput(){ //  a static method, every time tap happens
-   if (Nanoclock::now - lastTapTime < minimalTapInterval) {     // too little time
-    return;                                         // Debounce done
-  }
-
-  if (timesTapped == 0) {
-    firstTapTime = now;
-  }
-
-  timesTapped++;
-  lastTapTime = now;
-  // Serial.println("Tap!");
-}
-
-bool TapTempo::CheckTapButton(){ /* Handle tapping of the tap tempo button*/
-
-  if (timesTapped > 0 && timesTapped < minimumTaps && (now - lastTapTime) > maximumTapInterval) {
-                
-    timesTapped = 0;                                                    // Single taps, not enough to calculate BPM -> ignore!
-    return false;
-
-  } else if (timesTapped >= minimumTaps) {
-    avgTapInterval = (lastTapTime - firstTapTime) / (timesTapped - 1);
-    if ((now - lastTapTime) > (avgTapInterval * exitMargin / 100)) {
-      bpm = 60L * 1000 * 1000 * 10 / avgTapInterval;
-      return true;                                                      // it's time to update bpm and reset the blinker
-
-      // Update blinkCount to make sure LED blink matches tapped beat
-      // blinkCount = ((now - lastTapTime) * 24 / avgTapInterval) % CLOCKS_PER_BEAT;
-
-      timesTapped = 0;
+    held = false;
     }
-    return false;
-  }
 
+bool TapTempo::check(){                                           /* Handle tapping of the tap tempo button*/
+  buttonState = tapButton.read();                                 /* CheckTapButton() returns true if the new tempo is ready*/
+  now = micros();
+  switch (buttonState)
+  {
+    case MD_UISwitch::KEY_NULL: {
+      // do nothing
+      break;
+    }
+    case MD_UISwitch::KEY_UP: {
+      held = false;                                               // Hold determines the OPTION key behaviour
+      break;
+    }
+    case MD_UISwitch::KEY_DOWN: {                                 // At last, a keypress
+      if (!held)                                                  // and the button has been released since last keypress
+      {
+        if (timesTapped > 0 && timesTapped < minimumTaps && (now - lastTapTime) > maximumTapInterval) {  // Single taps, not enough to calculate BPM -> ignore!
+        timesTapped = 0;                                                   
+        held = true;      
+        return false;
+        } else if (timesTapped >= minimumTaps) {                              // enough taps for calculating a new tempo
+        avgTapInterval = (lastTapTime - firstTapTime) / (timesTapped - 1);
+        if ((now - lastTapTime) > (avgTapInterval * EXIT_MARGIN / 100)) {    // If taps are consistent enough
+          newTempo = 60L * 1000 * 1000 * 10 / avgTapInterval;               // Convert interval to tempo in BPM
+          held = true;                                                      //
+          return true;
+        } else{
+          timesTapped = 0;                                                  // Reset taps counter
+          held = true;
+          return false;
+        }} else{                                                            // not enough taps
+        timesTapped++;
+        held = true;
+        return false;  
+        }
+      }
+      break;
+    }      
+    default: break;
+  }
 }
