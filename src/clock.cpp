@@ -54,29 +54,31 @@ so 40 basic divisions will go like this:
 #define MIDI_START 0xFA
 #define MIDI_STOP 0xFC
 
-Clock::Clock(uint8_t _one, uint8_t _two): main (_one, _two){                                                 // construct and initialize an object
+Clock::Clock(uint8_t _pin1, uint8_t _pin2, uint8_t _pin3, uint8_t _pin4): main(MAIN, _pin1), aux1 (AUX1, _pin2), aux2 (AUX2, _pin3), aux3 (AUX3, _pin4){                                                 // construct and initialize an object
     Timer1.initialize(intervalMicroseconds);                    // value is 1000000 by default
     Timer1.setPeriod(calculateIntervalMicroSecs(DEFAULT_TEMPO));
     Timer1.attachInterrupt(Clock::sendClock);
-    mainPeriod = 24;                                            // 1/8 for 24 PPQN
+    main.reset();
+    aux1.reset();
+    aux2.reset();
+    aux3.reset();
 }   
+
+long Clock::getTime(){
+  return;
+}
 
 long Clock::calculateIntervalMicroSecs(uint8_t _bpm) {          // Take care about overflows!
   return 60L * 1000 * 1000 * 10 / bpm / CLOCKS_PER_BEAT;        // ok
 }
 
-void Clock::update (uint8_t bpm){
+void Clock::updateTempo (uint8_t bpm){
     long interval = calculateIntervalMicroSecs(bpm);
     Timer1.setPeriod(interval);
 }
 
 void Clock::reset (){
     running = false;
-    mainCounter = 0;
-    aux1Counter = 0;
-    aux2Counter = 0;
-    aux2Counter = 0;
-    aux3Counter = 0;
     running = true;
 }
 
