@@ -68,7 +68,7 @@ void outputChannel::setParameter (uint8_t _param, uint8_t _val){
 }
 
 void outputChannel::recalculate(){
-    if (swing = 0){                                         // Zero swing
+    if (swing == 0){                                         // Zero swing
         halfPeriod1 = period/2;                             // theoretically, our half-periods should be equal, but we're  
         halfPeriod2 = period - halfPeriod1;                 // dealing with integers here, seems safer this way
         pulseWidth = (halfPeriod1 * pulseWidthRatio)/100;   // serious ARITHMETICS here
