@@ -33,7 +33,7 @@ using namespace Nanoclock;
   digitalWrite(_a3, channel_bits[channel][3]);
 }
 
-int MultiplexedPots::potValue(int chan){
+/*int MultiplexedPots::potValue(int chan){
   setChannel(chan);
   return analogRead(_adcPin);
-}
+}*/

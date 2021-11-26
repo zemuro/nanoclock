@@ -51,4 +51,5 @@ bool TapTempo::check(){                                           /* Handle tapp
     }      
     default: break;
   }
+  return false;
 };

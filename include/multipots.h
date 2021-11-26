@@ -39,7 +39,7 @@ namespace Nanoclock{
         public:
 
         MultiplexedPots(int a0, int a1, int a2, int a3, int adcpin); // the class constructor
-        int potValue (int potNumber);   // read pot
+       // int potValue (int potNumber);   // read pot
         int potValue_8 (int potNumber); // read pot, return 8-bit value
 
 

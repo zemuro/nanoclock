@@ -50,10 +50,13 @@
     #define ENC_PIN_A   1       // encoder pins (2 digital pins)
     #define ENC_PIN_B   8
 
-    #define OUT_MAIN_PIN 4   // Outputs (4 pins)
-    #define OUT1_PIN 5
-    #define OUT2_PIN 6
-    #define OUT3_PIN 7
+    // Outputs (4 pins)
+    
+    const uint8_t OUT_MAIN_PIN = 4;
+    const uint8_t OUT1_PIN = 5;
+    const uint8_t OUT2_PIN = 6;
+    const uint8_t OUT3_PIN = 7;
+ 
     
     #define TAP_TEMPO
         #ifdef  TAP_TEMPO

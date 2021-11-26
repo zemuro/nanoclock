@@ -3,11 +3,12 @@
 #define MAIN_H  
 #include <TimerOne.h>
 #include "nanoclock_configuration.h"
-#include "taptempo.h"
-#include "clock.h"
-#include "buttonmatrix.h"
+#include <taptempo.h>
+#include <clock.h>
+#include <interface.h>
 
 //namespace Nanoclock{
+
 
 enum Modes{
         KEY_RUN       = 0,
@@ -32,11 +33,11 @@ enum Modes{
         COUNTER       = 19
     };
 
-static uint8_t bpm;
-static uint8_t encoderMode;
-static uint8_t main_PW;
+//static uint8_t bpm;
+//static uint8_t encoderMode;
+//static uint8_t main_PW;
 bool encoderRead;
-static uint8_t state;
+//static uint8_t state;
 static volatile uint8_t currentMode;
 // static volatile long now;
 

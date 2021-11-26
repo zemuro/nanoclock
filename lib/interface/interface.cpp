@@ -1,4 +1,4 @@
-#include "buttonmatrix.h"
+#include "interface.h"
 
 
 PhysicalInterface::PhysicalInterface(uint8_t _number, uint8_t _pinClk, uint8_t _pinKey, uint8_t _pinRST, uint8_t _encA, uint8_t _encB, uint8_t _cl, uint8_t _dio):buttons(_number, _pinClk, _pinKey, _pinRST), encoder(_encA, _encB), display(_cl, _dio){
@@ -29,6 +29,7 @@ bool PhysicalInterface::checkButtons(bool _shift){
         }        
         }
     }
+    return false;
 }
 
 bool PhysicalInterface::checkEncoder(){
