@@ -11,23 +11,9 @@ class PhysicalInterface{
     public:
     PhysicalInterface(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t); // PhysicalInterface(uint8_t _number, uint8_t _pinClk, uint8_t _pinKey, uint8_t _pinRST);
     
-    bool checkButtons(bool);
-    bool checkEncoder();
+    bool checkButtons(bool);            // returns true if there's any change in butons state
+    bool checkEncoder();                // returns true if there's a new encoder value
     void updateDisplay();
-    uint8_t option;
-
-    int8_t encoderValue;
-    
-    private:
-    uint8_t encoderData;
-    uint8_t encoderSpeed;
-    const uint16_t ENCODER_PERIOD = 150;
-    MD_UISwitch_4017KM buttons;
-    MD_UISwitch::keyResult_t key;
-    MD_REncoder encoder;
-    GyverTM1637 display;
-
-    int8_t adaptiveChange(uint8_t, uint8_t);
 
     enum Constants{
         KEY_RUN       = 0,
@@ -51,6 +37,18 @@ class PhysicalInterface{
         OPTION_2      = 18,
         COUNTER       = 19
     };
+    uint8_t option;                     // the new button value (from Button::constants)
+    int8_t encoderValue;                // signed - decrement or increment
+
+    private:
+    uint8_t encoderData;
+    uint8_t encoderSpeed;
+    const uint16_t ENCODER_PERIOD = 150;
+    MD_UISwitch_4017KM buttons;
+    MD_UISwitch::keyResult_t key;
+    MD_REncoder encoder;
+    GyverTM1637 display;
+    int8_t adaptiveChange(uint8_t, uint8_t);
 };
 
 

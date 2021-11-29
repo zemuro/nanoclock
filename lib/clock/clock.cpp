@@ -53,44 +53,55 @@ so 40 basic divisions will go like this:
 #define CLOCKS_PER_BEAT 24
 #define MIDI_START 0xFA
 #define MIDI_STOP 0xFC
-
-Clock::Clock(uint8_t _pin1, uint8_t _pin2, uint8_t _pin3, uint8_t _pin4): main(MAIN, _pin1), aux1 (AUX1, _pin2), aux2 (AUX2, _pin3), aux3 (AUX3, _pin4){                                                 // construct and initialize an object
-    Timer1.initialize(intervalMicroseconds);                    // value is 1000000 by default
-    Timer1.setPeriod(calculateIntervalMicroSecs(DEFAULT_TEMPO));
-    Timer1.attachInterrupt(Clock::sendClock);
+    
+Clock::Clock(uint8_t _pin1, uint8_t _pin2, uint8_t _pin3, uint8_t _pin4): main(MAIN, _pin1), aux1(AUX1, _pin2), aux2(AUX2, _pin3), aux3(AUX3, _pin4){   
+    //instance = this;                                              // construct and initialize an object
     main.reset();
     aux1.reset();
     aux2.reset();
     aux3.reset();
 }   
 
+void Clock::changeParameter(uint8_t _option, int8_t _value){
+    if (_option <= 1 || _option == 16){     //main channel
+        main.changeParameter (_option, _value);
+        return;   
+    } //else if (_option <= 4 )
+}
+
+void Clock::tick(){
+    main.tick();
+    aux1.tick();
+    aux2.tick();
+    aux3.tick();
+    return;
+}
+
 long Clock::getTime(){
   return 0L;
 }
 
-long Clock::calculateIntervalMicroSecs(uint8_t _bpm) {          // Take care about overflows!
+long Clock::calculateIntervalMicroSecs(long _bpm) {          // Take care about overflows!
   return 60L * 1000 * 1000 * 10 / bpm / CLOCKS_PER_BEAT;        // ok
 }
 
 void Clock::updateTempo (uint8_t bpm){
-    long interval = calculateIntervalMicroSecs(bpm);
-    Timer1.setPeriod(interval);
+    return;
 }
 
 void Clock::reset (){
     running = false;
+    main.reset();
+    aux1.reset();
+    aux2.reset();
+    aux3.reset();
     running = true;
+    return;
 }
 
 void Clock::startStop(){
-     if (!running) {
-    Serial.println("Start playing");
-    //Serial1.write(MIDI_START);
-  } else {
-    Serial.println("Stop playing");
-    //Serial1.write(MIDI_STOP);
-  }
-  running = !running;
+    running = !running;
+    return;
 }
 
 /* Period = 12
@@ -147,7 +158,7 @@ outputChannel::outputChannel(uint8_t _index, uint8_t _pin, long _period, char _s
     pulseCounter = 0;
     };
 
-outputChannel::outputChannel(uint8_t _index, uint8_t _pin): swing(DEFAULT_SWING), pulseWidthRatio(DEFAULT_PW), delay(DEFAULT_DELAY), period(DEFAULT_PERIOD){
+outputChannel::outputChannel(uint8_t _index, uint8_t _pin): swing(DEFAULT_SWING), pulseWidthRatio(DEFAULT_PW), delay(DEFAULT_DELAY), period(DEFAULT_PPQN){
     cnannelIndex = _index;
     halfPeriod1 = period / 2;
     halfPeriod2 = period - halfPeriod1;
@@ -165,31 +176,31 @@ void outputChannel::reset(){
     return;
 }
 
-void outputChannel::setParameter (uint8_t _param, uint8_t _val){
+void outputChannel::changeParameter (uint8_t _param, int8_t _val){
     switch (_param)
     {
     case PERIOD: {
-        period = _val;
+        period += _val;
         recalculate();
         break;
     }
     case DIVISOR: {
-        period = _val;
+        period += _val;
         recalculate();
         break;
     }
     case SWING: {
-        swing = (char) _val;
+        swing += (char) _val;
         recalculate();
         break;
     }
     case PW: {
-        pulseWidthRatio = _val;
+        pulseWidthRatio += _val;
         recalculate();
         break;
     }
     case DELAY: {
-        delay = _val;
+        delay += _val;
         recalculate();
         break;
     }

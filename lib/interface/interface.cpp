@@ -32,16 +32,6 @@ bool PhysicalInterface::checkButtons(bool _shift){
     return false;
 }
 
-bool PhysicalInterface::checkEncoder(){
-    encoderData = encoder.read();                       // let's check out these buttons (will move this code to some class later)
-  if (encoderData){
-    encoderSpeed = encoder.speed(); 
-    encoderValue = adaptiveChange(encoderData, encoderSpeed);
-    return true;
-    }
-    return false;
-}
-
 int8_t adaptiveChange (uint8_t direction, uint8_t speed){
     
   int8_t increment = 1;                           // By default we are changing some value by 1
@@ -54,5 +44,15 @@ int8_t adaptiveChange (uint8_t direction, uint8_t speed){
   }
   
   if (direction == DIR_CW) return increment;      // return a positive increment if rotating clockwise
-  return -increment;                              // hey, we need a signed type
+  return -increment;                              //
+  }
+
+bool PhysicalInterface::checkEncoder(){
+    encoderData = encoder.read();                       // let's check out these buttons (will move this code to some class later)
+  if (encoderData){
+    encoderSpeed = encoder.speed(); 
+    encoderValue = adaptiveChange(encoderData, encoderSpeed);
+    return true;
+    }
+    return false;
 }
