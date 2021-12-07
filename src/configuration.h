@@ -33,8 +33,6 @@
 
 #endif                                      // 12 digital pins, not bad
 
-
-
 #ifdef ARDUINO_UNO
 
     const uint8_t BUTTONS_2017_CLK = 11;     // 4x4 button matrix, connected to 4017 -- need to rewrite library
@@ -50,7 +48,7 @@
     const uint8_t ENC_PIN_A = 1;            // encoder pins (2 digital pins)
     const uint8_t ENC_PIN_B = 8;
     
-    const uint8_t OUT_MAIN_PIN = 4;         // Trigger/gate output pins (4 digital pins)
+    const uint8_t OUT_MAIN_PIN = LED_BUILTIN;         // Trigger/gate output pins (4 digital pins)
     const uint8_t OUT1_PIN = 5;
     const uint8_t OUT2_PIN = 6;
     const uint8_t OUT3_PIN = 7;
