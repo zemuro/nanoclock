@@ -8,14 +8,10 @@
 class outputChannel{
     
     private:
-
-
-
-
     const uint8_t DEFAULT_PPQN = 24;
     const long DEFAULT_DELAY = 0;
-    const uint8_t DEFAULT_PW = 10;
-    const int8_t DEFAULT_SWING = 0;
+    const uint8_t DEFAULT_PW = 25;
+    const int8_t DEFAULT_SWING = 50;
 
     uint8_t cnannelIndex;
     
@@ -23,13 +19,15 @@ class outputChannel{
     int8_t swing;                             // Swing: -100..100
     uint8_t pulseWidthRatio;                     // Pulse width: 0..100
     uint8_t outputPin;
-    int counter;
-    bool currentPeriod;                            // Selects current period
+    //int counter;
+    bool secondPeriod;                            // Selects current period
     long delay;
     long period;                             // Period in clock ticks (at 24 tick per quarter)
-    int pulseWidth;
+    long pulseWidth;
     void recalculate();                      // The magic!
-    int counter1, counter2, pulseCounter;
+    long counter, pulseCounter;
+    void printVals();
+    long displacement;
 
     public:
         enum Parameters: uint8_t {
@@ -44,14 +42,19 @@ class outputChannel{
     outputChannel (uint8_t, uint8_t);                               // outputChannel (channelIndex, channelPin)
     void reset ();
     void changeParameter (uint8_t, int8_t);                           // setParameter (parameter, value)
-    void tick ();
+    bool tick ();
 };
 
 class Clock{
     //public:
     // Clock ();                                             // a class constructor
     private:
-        
+            
+    outputChannel main;
+    outputChannel aux1;
+    outputChannel aux2;
+    outputChannel aux3;
+
         enum Channels: uint8_t{
         MAIN = 0,
         AUX1 = 1,
@@ -62,13 +65,14 @@ class Clock{
     static void marshall();
     const long DEFAULT_TEMPO = 1000;
     static uint8_t channelIndex;
+    bool doubleTick;
     
     void updateTempo(uint8_t);                       // 
     uint8_t bpm;                                     // bpm is in tenths of BPM
     
     public:
         
-    enum Options{
+    enum Options: uint8_t{
         MAIN_RESET      = 0,
         MAIN_STARTSTOP  = 1,
         AUX1_DIVISOR    = 2,
@@ -98,12 +102,8 @@ class Clock{
     void setBpm (uint8_t);                           // translate tempo in bpm to interval in microseconds, set the timer period
     void changeParameter (uint8_t , int8_t);
     long getTime();
-    void tick();                                    // all the magic happens here
-    
-    outputChannel main;
-    outputChannel aux1;
-    outputChannel aux2;
-    outputChannel aux3;
+    bool tick();                                    // all the magic happens here
+
         
 };
 

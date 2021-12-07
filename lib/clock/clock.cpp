@@ -54,12 +54,15 @@ so 40 basic divisions will go like this:
 #define MIDI_START 0xFA
 #define MIDI_STOP 0xFC
     
-Clock::Clock(uint8_t _pin1, uint8_t _pin2, uint8_t _pin3, uint8_t _pin4): main(MAIN, _pin1), aux1(AUX1, _pin2), aux2(AUX2, _pin3), aux3(AUX3, _pin4){   
+//Clock::Clock(uint8_t _pin1, uint8_t _pin2, uint8_t _pin3, uint8_t _pin4): main(MAIN, _pin1), aux1(AUX1, _pin2), aux2(AUX2, _pin3), aux3(AUX3, _pin4){   
+    Clock::Clock(uint8_t _pin1, uint8_t _pin2, uint8_t _pin3, uint8_t _pin4): main(MAIN, LED_BUILTIN), aux1(AUX1, _pin2), aux2(AUX2, _pin3), aux3(AUX3, _pin4){   
     //instance = this;                                              // construct and initialize an object
     main.reset();
     aux1.reset();
     aux2.reset();
     aux3.reset();
+    running = true;
+    doubleTick = false;
 }   
 
 void Clock::changeParameter(uint8_t _option, int8_t _value){
@@ -69,12 +72,11 @@ void Clock::changeParameter(uint8_t _option, int8_t _value){
     } //else if (_option <= 4 )
 }
 
-void Clock::tick(){
-    main.tick();
+bool Clock::tick(){
     aux1.tick();
     aux2.tick();
     aux3.tick();
-    return;
+    return (main.tick());
 }
 
 long Clock::getTime(){
@@ -82,7 +84,8 @@ long Clock::getTime(){
 }
 
 long Clock::calculateIntervalMicroSecs(long _bpm) {          // Take care about overflows!
-  return 60L * 1000 * 1000 * 10 / bpm / CLOCKS_PER_BEAT;        // ok
+  //return 60L * 1000 * 1000 * 10 / _bpm / CLOCKS_PER_BEAT;        // ok
+  return 600000000/(24*_bpm);
 }
 
 void Clock::updateTempo (uint8_t bpm){
@@ -141,11 +144,17 @@ void Clock::startStop(){
  counter                00 01 02 03 04 05 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 00 01 02    PW1 = pw * maxPW1 = 1 * 5 = 5, PW2 = PW1 = 5
  output                 |  |  |  |  |  _  |  |  |  |  |  _  _  _  _  _  _  _  _  _  _  _  _  _  |  |  |     
 
+period = 24
+swing = 100
+(period/4)*swing/100
+period*swing / 400 = 2400/400 = 6
+6*swing/100 = 6
+
 
 */
 outputChannel::outputChannel(uint8_t _index, uint8_t _pin, long _period, char _swing, uint8_t _pw, long _delay){
     cnannelIndex = _index;
-    period = _period;
+    period = _period * 4;
     swing = _swing;
     delay = _delay;
     pulseWidthRatio = _pw;
@@ -154,24 +163,28 @@ outputChannel::outputChannel(uint8_t _index, uint8_t _pin, long _period, char _s
     outputPin = _pin;
     pinMode(outputPin, OUTPUT);
     counter = 0;
-    currentPeriod = false;
+    secondPeriod = false;
     pulseCounter = 0;
+    recalculate();
     };
 
 outputChannel::outputChannel(uint8_t _index, uint8_t _pin): swing(DEFAULT_SWING), pulseWidthRatio(DEFAULT_PW), delay(DEFAULT_DELAY), period(DEFAULT_PPQN){
     cnannelIndex = _index;
-    halfPeriod1 = period / 2;
-    halfPeriod2 = period - halfPeriod1;
+    period = period * 2;
+    halfPeriod1 = period / 2;               // 25/2 = 12 - 1 = 11 (0..11 - 12 counts)  
+    halfPeriod2 = period - halfPeriod1;     // 25 - 12 = 13 - 1 = 12 (13 counts)
     outputPin = _pin;
     pinMode(outputPin, OUTPUT);
     counter = 0;
-    currentPeriod = false;
-    pulseCounter = 0;
+    secondPeriod = false;
+    pulseCounter = 0;       
+    Serial.begin(9600);                //
+    recalculate();
     };
 
 void outputChannel::reset(){
     counter = 0;
-    currentPeriod = false;
+    secondPeriod = false;
     pulseCounter = 0;
     return;
 }
@@ -211,83 +224,112 @@ void outputChannel::changeParameter (uint8_t _param, int8_t _val){
 }
 
 void outputChannel::recalculate(){
-    if (swing == 0){                                         // Zero swing
-        halfPeriod1 = period/2;                             // theoretically, our half-periods should be equal, but we're  
-        halfPeriod2 = period - halfPeriod1;                 // dealing with integers here, seems safer this way
-        pulseWidth = (halfPeriod1 * pulseWidthRatio)/100;   // serious ARITHMETICS here
+    if (swing == 0){                                            // Zero swing
+        halfPeriod1 = period/2 - 1;                             // theoretically, our half-periods should be equal, but we're  
+        halfPeriod2 = period - halfPeriod1 - 2;                 // dealing with integers here, seems safer this way
+        pulseWidth = (halfPeriod1 * pulseWidthRatio)/100;       // serious ARITHMETICS here
+        printVals();
         return;
     }
-    else if (swing >0){                                     // positive swing
-        halfPeriod2 = (period * swing) / 400;               // swing = 100 - second half is 1/4 * period
-        halfPeriod1 = period = halfPeriod2;
-        pulseWidth = (halfPeriod2 * pulseWidthRatio) / 100;  // can't be longer than the smallest period
+    else if (swing >0){                                         // positive swing
+        displacement = (period * swing) /400;                   // swing = 50 - second half is 0.25 * period ((period/2)/4)*swing / 100 = period*swing/800
+        halfPeriod2 = period/2 - 1 - displacement;              // swing = 25, hp2 = 24*25 = 600/400 = 1.5
+        halfPeriod1 = period - halfPeriod2 - 2;                 // 100*12/800 = 1200/800 = 1,5
+        pulseWidth = (halfPeriod2 * pulseWidthRatio) / 100;     // can't be longer than the smallest period
+        printVals();
         return;
     }
-    
-    halfPeriod1 = (period * swing) / 400;                   // negative swing - first period is shorter
-    halfPeriod2 = period = halfPeriod2;                     //
-    pulseWidth = (halfPeriod1 * pulseWidthRatio) / 100;     // can't be longer than the smallest period (max - )
+    swing = -swing;                                             // (12 * 30) / 400 = 360/400 = 0!!
+    halfPeriod1 = (period * swing) / 400 - 1;                   // negative swing - first period is shorter
+    halfPeriod2 = period - halfPeriod2 - 1;                     //
+    pulseWidth = (halfPeriod1 * pulseWidthRatio) / 100;         // can't be longer than the smallest period (max - )
+    printVals();
     return;
 }
-
-void outputChannel::tick(){
-    if (counter1 <= halfPeriod1 && !currentPeriod){                         // we are in the first half
-        if (pulseCounter <= pulseWidth && pulseCounter < halfPeriod1){      // still forming a pulse and haven't reached the end of the period yet
-            digitalWrite (outputPin, HIGH);                                 // here she goes
-            pulseCounter++;                                                 // increment counter
-            counter++;                                                      // the other counter
-            return;
-        }
-        if (pulseCounter > pulseWidth && pulseCounter < halfPeriod1){       // still forming a zero and haven't reached the end of the period yet
-            digitalWrite (outputPin, LOW);                                  //
+void outputChannel::printVals(){
+    Serial.print("\nPeriod =");
+    Serial.print(period);
+    Serial.print("\thalf1 = ");
+    Serial.print(halfPeriod1);
+    Serial.print("\thalf2 = ");
+    Serial.print(halfPeriod2);
+    Serial.print("\tswing = ");
+    Serial.print(swing);
+    Serial.print("\tpw = ");
+    Serial.print(pulseWidth);
+    Serial.print("\tdisplacement = ");
+    Serial.print(displacement);
+    return;
+}
+bool outputChannel::tick(){
+  /* if (counter <= halfPeriod1){
+        digitalWrite (outputPin, HIGH);
+        counter++;
+        return;
+    } else if (counter <= (halfPeriod1 + halfPeriod2)){
+        digitalWrite (outputPin, LOW);
+        counter++;
+    } else {
+        digitalWrite (outputPin, LOW);
+        counter = 0;
+    }*/
+    if (!secondPeriod){
+        if(counter < halfPeriod1){
+            if (pulseCounter <= pulseWidth){        // still forming a pulse and haven't reached the end of the period yet
+            digitalWrite (outputPin, HIGH);         // here she goes
             pulseCounter++;
             counter++;
-            return;
+            return true;
         }
-        if (counter1 == halfPeriod1){                                       // reached the last step of halfPeriod1
+            if (pulseCounter > pulseWidth){       // still forming a zero and haven't reached the end of the period yet
+                digitalWrite (outputPin, LOW);                                  //
+                pulseCounter++;
+                counter++;
+                return false;
+            }
+        }
+        if (counter == halfPeriod1){                                       // reached the last step of halfPeriod1
             if (pulseCounter > pulseWidth){                                 
                 digitalWrite (outputPin, LOW);                              // form a zero
                 pulseCounter = 0;
                 counter = 0;                                                // reset the counter for the next half
-                currentPeriod = !currentPeriod;                             // flip a flag
-                return;
+                secondPeriod = !secondPeriod;                             // flip a flag
+                return false;
             }   else{                                                       // high PW - we're STILL forming a pulse
                 digitalWrite (outputPin, HIGH);                             // well whatever (maybe should make an option to always leave a zero tick before the next half)
-                pulseCounter = 0;                                           //
-                counter = 0;                                                // reset the counters
-                currentPeriod = !currentPeriod;                             // to the second half we go!
-                return;
+                pulseCounter = 0;                                         //
+                counter = 0;                                              // reset the counters
+                secondPeriod = !secondPeriod;                             // to the second half we go!
+                return true;
             }
-
         }
     }
-    if (counter2 <= halfPeriod2){                                           // we're in the second half, it's safe to assume the flag is set
-        if (pulseCounter <= pulseWidth && pulseCounter < halfPeriod2){      // still positive
+
+    if (counter < halfPeriod2){                                             // we're in the second half, it's safe to assume the flag is set
+        if (pulseCounter <= pulseWidth){                                      // still positive
             digitalWrite (outputPin, HIGH);
             pulseCounter++;
             counter++;
-            return;
+            return true;
         }
-        if (pulseCounter > pulseWidth && pulseCounter < halfPeriod2){       // negative
+        if (pulseCounter > pulseWidth){       // negative
             digitalWrite (outputPin, LOW);
             pulseCounter++;
             counter++;
-            return;
+            return false;
         }
-        if (counter1 == halfPeriod1){                                       // reached the last step of halfPeriod2
+    }
+    //    if (counter == halfPeriod2){                                        // reached the last step of halfPeriod2
             if (pulseCounter > pulseWidth){                                 
                 digitalWrite (outputPin, LOW);                              // form a zero
                 pulseCounter = 0;
                 counter = 0;                                                // reset the counter for the next half
-                currentPeriod = !currentPeriod;                             // flip a flag
-                return;
+                secondPeriod = !secondPeriod;                             // flip a flag
+                return false;
             }                                                               // high PW - we're STILL forming a pulse
                 digitalWrite (outputPin, HIGH);                             // well whatever (maybe should make an option to always leave a zero tick before the next half)
                 pulseCounter = 0;                                           //
                 counter = 0;                                                // reset the counters
-                currentPeriod = !currentPeriod;                             // to the second half we go!
-                return;
-            
-        }  
-    } 
-};
+                secondPeriod = !secondPeriod;                             // to the second half we go!
+                return true;
+}

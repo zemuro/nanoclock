@@ -12,7 +12,7 @@
 #include <TimerOne.h>
 #include "configuration.h"
 
-const long DEFAULT_TEMPO = 1000;                // In 1/10'ths of BPM
+const long DEFAULT_TEMPO = 1200;                // In 1/10'ths of BPM
 const long MIN_BPM = 300;
 const long MAX_BPM = 2600;
 

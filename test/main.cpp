@@ -93,17 +93,18 @@ enum Modes{
 //static uint8_t bpm;
 //static uint8_t encoderMode;
 //static uint8_t main_PW;
-bool encoderRead;
-//static uint8_t state;
-static volatile uint8_t currentMode;
+// bool encoderRead;
+// static uint8_t state;
+// static volatile uint8_t currentMode;
 // static volatile long now;
 
 // Encoder modes
 
 //}
-#define ENCODER_PERIOD 500      //  ms
+// #define ENCODER_PERIOD 500      //  ms
 //}
 //using namespace Nanoclock;
+
 PhysicalInterface physicalInterface(16, BUTTONS_2017_CLK, BUTTONS_2017_KEY, BUTTONS_2017_RST, ENC_PIN_A, ENC_PIN_B, DISPLAY_CL, DISPLAY_DIO); 
 TapTempo tapButton(TAP_PIN, MIN_BPM, MAX_BPM, TAP_POLARITY);
 
@@ -129,5 +130,5 @@ void setup()
 
 void loop()
 {
+    if (physicalInterface.checkEncoder()){};
 }
-
