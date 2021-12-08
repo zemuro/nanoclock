@@ -183,19 +183,9 @@ displayData { 0xff, 0xff, 0xff, 0xff }{
 }
 
 void PhysicalInterface::setDot(bool _dot){
-  switch (_dot)
-  {
-  case true:
-    showBpm(lastTempo, true);
+  showBpm(lastTempo, _dot);
     return;
-    break;
-  
-  default:
-    showBpm(lastTempo, false);
-    return;
-    break;
-  }
-}
+   }
 
 void PhysicalInterface::displayValue(uint8_t _mode, long newValue, uint8_t output, bool dot){
   switch (_mode)
@@ -204,26 +194,31 @@ void PhysicalInterface::displayValue(uint8_t _mode, long newValue, uint8_t outpu
       showBpm (newValue, dot);
       lastTempo = newValue;
       currentMode = TEMPO;
+      return;
       break;
 
     case NOTE:
       showNote (newValue);
       lastNote[output] = newValue;
-      currentMode = SWING;
+      currentMode = NOTE;
+      return;
     break;
 
     case SWING:
       showNumber (newValue);
       lastSwing[output] = newValue;
       currentMode = SWING;
+      return;
     break;
 
     case PhysicalInterface::PW:
       showNumber(newValue);
       lastPW[output] = newValue;
       currentMode = PW;
+      return;
     break;
    default:
+   return;
     break;
   }
 }
@@ -233,11 +228,13 @@ void PhysicalInterface::showBpm(long tempo, bool dot){
   {
   case true:
     display.showNumberDecEx(tempo, 0b00100000);
+    //showNote(23);
     return;
     break;
   
   default:
     display.showNumberDecEx(tempo, 0b00000000);
+    //showNote(31);
     return;
     break;
   }

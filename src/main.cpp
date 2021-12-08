@@ -7,32 +7,26 @@ Clock clock(OUT_MAIN_PIN, OUT1_PIN, OUT2_PIN, OUT3_PIN);
 void tick()
 {
   if (clock.running) {
-        if (clock.tick()){
-          //interface.setDot(true);
-          return;
-        }
-        //interface.setDot(false);
+        clock.tick();
         return;
-    return;
   }
 }
 
-
 void setup()
 {
-    currentTempo = DEFAULT_TEMPO;
-    Timer1.initialize(1);
-    setTempo(currentTempo);
-    Timer1.attachInterrupt(tick);
-    //interface.updateDisplay();
+  Serial.begin(9600);
+  currentTempo = DEFAULT_TEMPO;
+  Timer1.initialize(1);
+  setTempo(currentTempo);
+  Timer1.attachInterrupt(tick);
 }
 
 void loop()
 {
   if (tapButton.check()){                                             // returns true if the Tap button was pressed repeatedly
+    //Serial.println("check done!");
     setTempo(tapButton.newTempo);
-    
-  }
+     }
   //interface.updateDisplay();
   /*
   if (interface.checkEncoder()){
@@ -61,11 +55,13 @@ void loop()
 
 void setTempo(long _tempo){
   Timer1.setPeriod(clock.calculateIntervalMicroSecs(_tempo));
-  //interface.displayValue(interface.TEMPO, _tempo, interface.MAIN, true);
-  for (uint8_t i = 0; i < 41; i++){
+  //Serial.print("period =" );
+  //Serial.println (clock.calculateIntervalMicroSecs(_tempo));
+  interface.displayValue(interface.TEMPO, _tempo, interface.MAIN, true);
+  /*for (uint8_t i = 0; i < 41; i++){
         interface.displayValue(interface.NOTE, i);
         delay(1000);
-  }
+  }*/
 
   return;
 }

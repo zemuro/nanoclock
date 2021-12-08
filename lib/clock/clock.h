@@ -102,7 +102,7 @@ class Clock{
     void setBpm (uint8_t);                           // translate tempo in bpm to interval in microseconds, set the timer period
     void changeParameter (uint8_t , int8_t);
     long getTime();
-    bool tick();                                    // all the magic happens here
+    void tick();                                    // all the magic happens here
 
         
 };
