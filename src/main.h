@@ -12,6 +12,20 @@
 #include <TimerOne.h>
 #include "configuration.h"
 
+const int8_t tempoIncrement[] = {
+    -100,
+    -50,
+    -10,
+    -5,
+    -1,
+    0,
+    1,
+    5,
+    10,
+    50,
+    100
+};
+
 const long DEFAULT_TEMPO = 1200;                // In 1/10'ths of BPM
 const long MIN_BPM = 300;
 const long MAX_BPM = 2600;

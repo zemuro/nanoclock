@@ -23,10 +23,17 @@ void setup()
 
 void loop()
 {
-  if (tapButton.check()){                                             // returns true if the Tap button was pressed repeatedly
-    //Serial.println("check done!");
-    setTempo(tapButton.newTempo);
+  if (tapButton.check()){
+    currentTempo = tapButton.newTempo;
+    setTempo(currentTempo);
      }
+
+  if (interface.checkEncoder()){
+    Serial.println(interface.encoderValue);
+    Serial.println(tempoIncrement[interface.encoderValue + 5]);
+    currentTempo = currentTempo + tempoIncrement[interface.encoderValue + 5];
+    setTempo(currentTempo);
+  }
   //interface.updateDisplay();
   /*
   if (interface.checkEncoder()){
@@ -58,6 +65,7 @@ void setTempo(long _tempo){
   //Serial.print("period =" );
   //Serial.println (clock.calculateIntervalMicroSecs(_tempo));
   interface.displayValue(interface.TEMPO, _tempo, interface.MAIN, true);
+  tapButton.newTempo = _tempo;
   /*for (uint8_t i = 0; i < 41; i++){
         interface.displayValue(interface.NOTE, i);
         delay(1000);

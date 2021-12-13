@@ -278,10 +278,13 @@ int8_t PhysicalInterface::adaptiveChange (uint8_t _direction, uint8_t _speed){
     
   increment = 1;                           // By default we are changing some value by 1
   
-  if (_speed > 20){                                // By turning the encoder very fast, we are incrementing/decrementing a value by 4
+  if (_speed > 55){                                // By turning the encoder very fast, we are incrementing/decrementing a value by 4
+    increment = 5;
+  }else if (_speed >35){                             // Moderately fast rotation - inc/dec by 2
     increment = 4;
-  }
-  else if (_speed >6){                             // Moderately fast rotation - inc/dec by 2
+  }else if (_speed > 25){
+    increment = 3;
+  }else if (_speed > 15){
     increment = 2;
   }
   
@@ -290,7 +293,7 @@ int8_t PhysicalInterface::adaptiveChange (uint8_t _direction, uint8_t _speed){
   }
 
 bool PhysicalInterface::checkEncoder(){
-    encoderData = encoder.read();                       // let's check out these buttons (will move this code to some class later)
+    encoderData = encoder.read();                       //
   if (encoderData){
     encoderSpeed = encoder.speed(); 
     encoderValue = adaptiveChange(encoderData, encoderSpeed);

@@ -69,7 +69,7 @@ class PhysicalInterface{
     uint8_t currentMode;
     uint8_t encoderData;
     uint8_t encoderSpeed;
-    const uint16_t ENCODER_PERIOD = 150;
+    const uint16_t ENCODER_PERIOD = 100;
     MD_UISwitch_4017KM buttons;
     MD_UISwitch::keyResult_t key;
     MD_REncoder encoder;

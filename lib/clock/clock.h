@@ -11,7 +11,7 @@ class outputChannel{
     const uint8_t DEFAULT_PPQN = 24;
     const long DEFAULT_DELAY = 0;
     const uint8_t DEFAULT_PW = 25;
-    const int8_t DEFAULT_SWING = 50;
+    const int8_t DEFAULT_SWING = 0;
 
     uint8_t cnannelIndex;
     
@@ -63,7 +63,7 @@ class Clock{
         };
    
     static void marshall();
-    const long DEFAULT_TEMPO = 1000;
+    //const long DEFAULT_TEMPO = 1000;
     static uint8_t channelIndex;
     bool doubleTick;
     
